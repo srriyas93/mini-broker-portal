@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -65,9 +66,9 @@ class User extends Authenticatable
         return $this->hasMany(KycSubmission::class);
     }
 
-    public function latestKyc(): HasMany
+    public function latestKyc(): HasOne
     {
-        return $this->hasMany(KycSubmission::class)->latestOfMany();
+        return $this->hasOne(KycSubmission::class)->latestOfMany();
     }
 
     public function transactions(): HasMany
@@ -93,6 +94,13 @@ class User extends Authenticatable
     public function isClient(): bool
     {
         return $this->role === UserRole::CLIENT;
+    }
+
+    public function isKycApproved(): bool
+    {
+        $latest = $this->latestKyc()->first();
+
+        return $latest !== null && $latest->isApproved();
     }
 
     public function isLocked(): bool

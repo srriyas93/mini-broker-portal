@@ -1,8 +1,10 @@
+export type UserRole = 'admin' | 'client';
+
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'admin' | 'client';
+  role: UserRole;
   phone?: string | null;
   balance: string | number;
   failed_login_attempts: number;
@@ -11,6 +13,8 @@ export interface User {
   updated_at: string;
 }
 
+export type KycStatusType = 'pending' | 'approved' | 'rejected';
+
 export interface KycSubmission {
   id: number;
   user_id: number;
@@ -18,7 +22,9 @@ export interface KycSubmission {
   document_number?: string | null;
   document_front_path?: string | null;
   document_back_path?: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  id_document_url?: string | null;
+  address_document_url?: string | null;
+  status: KycStatusType;
   rejection_reason?: string | null;
   reviewed_by?: number | null;
   reviewed_at?: string | null;
@@ -27,13 +33,26 @@ export interface KycSubmission {
   user?: User;
 }
 
+export type TransactionType =
+  | 'deposit'
+  | 'withdrawal'
+  | 'transfer'
+  | 'trade_profit'
+  | 'trade_loss';
+
+export type TransactionStatusType =
+  | 'pending'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
+
 export interface Transaction {
   id: number;
   user_id: number;
-  type: 'deposit' | 'withdrawal' | 'transfer' | 'trade_profit' | 'trade_loss';
+  type: TransactionType;
   amount: string | number;
   fee: string | number;
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  status: TransactionStatusType;
   reference_id?: string | null;
   description?: string | null;
   metadata?: Record<string, unknown> | null;
@@ -48,7 +67,17 @@ export interface ActivityLog {
   action: string;
   ip_address?: string | null;
   user_agent?: string | null;
-  details?: Record<string, unknown> | null;
+  details?: {
+    message?: string;
+    transaction_id?: number;
+    client_id?: number;
+    amount?: string | number;
+    type?: string;
+    status?: string;
+    reason?: string;
+    rejection_reason?: string;
+    [key: string]: unknown;
+  } | null;
   created_at: string;
   updated_at: string;
   user?: User;
@@ -57,5 +86,30 @@ export interface ActivityLog {
 export interface AuthResponse {
   token: string;
   user: User;
+  message?: string;
 }
 
+export interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
+export interface ClientDetailResponse {
+  profile: User;
+  balance: string | number;
+  latest_kyc: KycSubmission | null;
+  transactions: Transaction[];
+}
+
+export interface ApiErrorResponse {
+  message?: string;
+  remaining_minutes?: number;
+  errors?: Record<string, string[]>;
+}

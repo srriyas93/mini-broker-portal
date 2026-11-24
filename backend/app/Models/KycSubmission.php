@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Enums\KycStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,6 +28,7 @@ class KycSubmission extends Model
     protected function casts(): array
     {
         return [
+            'status' => KycStatus::class,
             'reviewed_at' => 'datetime',
         ];
     }
@@ -41,17 +45,16 @@ class KycSubmission extends Model
 
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === KycStatus::PENDING;
     }
 
     public function isApproved(): bool
     {
-        return $this->status === 'approved';
+        return $this->status === KycStatus::APPROVED;
     }
 
     public function isRejected(): bool
     {
-        return $this->status === 'rejected';
+        return $this->status === KycStatus::REJECTED;
     }
 }
-
